@@ -1,0 +1,47 @@
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+venv/
+FITS/.venv/
+FITS/IDM-VTON-main/.venv_idm/
+FITS/TASK_2/FITS_Recommender/FITS_Recommender/.venv/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Heavy runtime/output data
+Tryons/
+FITS/Tryons/
+FITS/TASK_1/captures/
+FITS/TASK_1/db/
+FITS/TASK_1/results/
+FITS/TASK_1/csv_exports/
+FITS/TASK_1/models/
+FITS/TASK_1/notebooks/
+FITS/TASK_3/output/
+FITS/TASK_3/raw_html/
+FITS/outputs/
+
+# Model/checkpoint artifacts (re-download on target)
+FITS/IDM-VTON-main/ckpt/
+FITS/IDM-VTON-main/eval_models/
+*.pth
+*.pt
+*.onnx
+*.pkl
+*.safetensors
+
+# Logs
+*.log
+*.out
+*.err
