@@ -52,12 +52,39 @@ def _configure_torch_speedups() -> None:
         pass
 
 
+def _try_enable_xformers() -> bool:
+    """Try to enable xformers for faster attention computation."""
+    try:
+        import xformers
+        return True
+    except ImportError:
+        return False
+
+
+def _enable_memory_optimizations(pipe) -> None:
+    """Enable memory optimizations based on environment settings."""
+    enable_attn_slicing = os.getenv("IDMVTON_ENABLE_ATTENTION_SLICING", "1").strip().lower() in {"1", "true", "yes"}
+    enable_vae_tiling = os.getenv("IDMVTON_ENABLE_VAE_TILING", "1").strip().lower() in {"1", "true", "yes"}
+    
+    if enable_attn_slicing:
+        try:
+            pipe.enable_attention_slicing()
+        except Exception:
+            pass
+    
+    if enable_vae_tiling:
+        try:
+            pipe.enable_vae_tiling()
+        except Exception:
+            pass
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Single-image IDM-VTON inference for FITS")
     parser.add_argument("--person", required=True, help="Path to person image")
     parser.add_argument("--cloth", required=True, help="Path to cloth image")
     parser.add_argument("--output", required=True, help="Path to output image")
-    parser.add_argument("--steps", type=int, default=30, help="Denoising steps")
+    parser.add_argument("--steps", type=int, default=20, help="Denoising steps (default: 20, recommend 15-25 for speed/quality balance)")
     parser.add_argument("--width", type=int, default=768, help="Output width (multiple of 64 recommended)")
     parser.add_argument("--height", type=int, default=1024, help="Output height (multiple of 64 recommended)")
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
@@ -103,6 +130,9 @@ def load_models(device: str, dtype: torch.dtype):
 
     pipe.to(device)
     pipe.unet_encoder.to(device)
+    
+    # Enable memory optimizations for faster inference on smaller GPUs
+    _enable_memory_optimizations(pipe)
 
     return pipe
 

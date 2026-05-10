@@ -1338,6 +1338,13 @@ IDMVTON_HQ_WIDTH = int(os.getenv("IDMVTON_HQ_WIDTH", str(IDMVTON_WIDTH)))
 IDMVTON_HQ_HEIGHT = int(os.getenv("IDMVTON_HQ_HEIGHT", str(IDMVTON_HEIGHT)))
 IDMVTON_USE_WORKER = os.getenv("IDMVTON_USE_WORKER", "1").strip().lower() in {"1", "true", "yes", "on"}
 IDMVTON_WORKER_SCRIPT = Path(os.getenv("IDMVTON_WORKER_SCRIPT", str(IDMVTON_ROOT / "fits_idm_worker.py"))).resolve()
+# Default inference steps (optimized from 30 to 20 for local RTX 2000 Ada)
+IDMVTON_STEPS_PREVIEW = int(os.getenv("IDMVTON_STEPS_PREVIEW", "8"))   # Quick iteration
+IDMVTON_STEPS_HQ = int(os.getenv("IDMVTON_STEPS_HQ", "20"))           # Quality (was 30, optimized)
+IDMVTON_STEPS = int(os.getenv("IDMVTON_STEPS", str(IDMVTON_STEPS_HQ)))  # Backward compatible
+IDMVTON_WIDTH = int(os.getenv("IDMVTON_WIDTH", "768"))
+IDMVTON_HEIGHT = int(os.getenv("IDMVTON_HEIGHT", "1024"))
+IDMVTON_TIMEOUT = int(os.getenv("IDMVTON_TIMEOUT", "1800"))
 # Command template placeholders: {python} {root} {person} {cloth} {output} {steps} {width} {height}
 IDMVTON_COMMAND = os.getenv(
     "IDMVTON_COMMAND",
