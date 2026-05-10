@@ -77,4 +77,4 @@ with gr.Blocks(title="FITS IDM-VTON Endpoint") as demo:
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "7860"))
-    demo.queue(default_concurrency_limit=1).launch(server_name="0.0.0.0", server_port=port)
+    demo.queue(default_concurrency_limit=1).launch(server_name="0.0.0.0", server_port=port, share=True)
