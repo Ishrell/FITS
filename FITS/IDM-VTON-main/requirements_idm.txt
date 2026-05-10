@@ -1,8 +1,6 @@
-# GPU: CUDA 12.1 enabled PyTorch
-# Install with: pip install -r requirements_idm.txt --index-url https://download.pytorch.org/whl/cu121
-torch==2.1.2
-torchvision==0.16.2
-torchaudio==2.1.2
+# GPU: install PyTorch separately first for your CUDA/Python combo, then install this file.
+# Recommended on RunPod Python 3.12 + CUDA 12.1:
+# pip install torch==2.5.1+cu121 torchvision==0.20.1+cu121 torchaudio==2.5.1+cu121 --index-url https://download.pytorch.org/whl/cu121
 numpy==1.26.4
 opencv-python==4.11.0.86
 Pillow>=9.0
@@ -20,7 +18,8 @@ mediapipe==0.10.5
 onnxruntime==1.17.0
 scipy==1.11.4
 scikit-learn==1.3.2
-detectron2>=0.6
+# detectron2 is vendored under preprocess/humanparsing/mhp_extension/detectron2
+# and is not required as a pip package in this repo runtime.
 pycocotools>=2.0.4
 fvcore>=0.1.5.post20210915
 cloudpickle>=2.0
