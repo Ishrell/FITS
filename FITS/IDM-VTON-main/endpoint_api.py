@@ -29,6 +29,13 @@ QUALITY_PRESETS = {
     "preview": {"steps": 12, "width": 576, "height": 768},
 }
 
+REQUIRED_CKPTS = [
+    ROOT_DIR / "ckpt" / "humanparsing" / "parsing_atr.onnx",
+    ROOT_DIR / "ckpt" / "humanparsing" / "parsing_lip.onnx",
+    ROOT_DIR / "ckpt" / "densepose" / "model_final_162be9.pkl",
+    ROOT_DIR / "ckpt" / "openpose" / "ckpts" / "body_pose_model.pth",
+]
+
 
 def _safe_unlink(path: Path) -> None:
     try:
@@ -40,6 +47,14 @@ def _safe_unlink(path: Path) -> None:
 
 def _preset_values(profile: str) -> dict[str, int]:
     return QUALITY_PRESETS.get(profile.lower(), QUALITY_PRESETS["hq"])
+
+
+def _missing_ckpts() -> list[str]:
+    missing: list[str] = []
+    for p in REQUIRED_CKPTS:
+        if not p.is_file():
+            missing.append(str(p))
+    return missing
 
 
 def _warm_runtime() -> None:
@@ -60,7 +75,11 @@ def on_startup() -> None:
 
 @APP.get("/healthz")
 def healthz() -> dict[str, str]:
-    return {"status": "ok"}
+    missing = _missing_ckpts()
+    return {
+        "status": "ok" if not missing else "degraded",
+        "missing_ckpts": "" if not missing else " | ".join(missing),
+    }
 
 
 @APP.post("/warmup")
@@ -80,6 +99,16 @@ async def tryon(
     garment_desc: str = Form("upper body garment"),
     seed: int = Form(42),
 ) -> FileResponse:
+    missing = _missing_ckpts()
+    if missing:
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Required checkpoints are missing. Run `python download_ckpts.py` first. Missing: "
+                + ", ".join(missing)
+            ),
+        )
+
     req_id = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
     person_ext = Path(person.filename or "person.jpg").suffix or ".jpg"
     garment_ext = Path(garment.filename or "garment.jpg").suffix or ".jpg"
