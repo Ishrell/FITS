@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 import gradio as gr
 from PIL import Image
@@ -18,6 +19,30 @@ QUALITY_PRESETS = {
     "HQ (recommended)": {"steps": 30, "width": 768, "height": 1024},
     "Preview (faster)": {"steps": 12, "width": 576, "height": 768},
 }
+
+
+def _patch_gradio_schema_bool_bug() -> None:
+    """Handle bool JSON-schema leaves that can crash gradio_client type rendering."""
+    try:
+        from gradio_client import utils as client_utils
+    except Exception:
+        return
+
+    if getattr(client_utils, "_fits_bool_schema_patch", False):
+        return
+
+    original = client_utils._json_schema_to_python_type
+
+    def _safe_json_schema_to_python_type(schema: Any, defs: Any = None):
+        if isinstance(schema, bool):
+            return "dict[str, Any]" if schema else "None"
+        return original(schema, defs)
+
+    client_utils._json_schema_to_python_type = _safe_json_schema_to_python_type
+    client_utils._fits_bool_schema_patch = True
+
+
+_patch_gradio_schema_bool_bug()
 
 
 def _preset_values(profile: str) -> dict[str, int]:
